@@ -1,8 +1,16 @@
 # Pipper
 
+[![PyPI version](https://badge.fury.io/py/pipper.svg)](https://pypi.org/project/pipper/)
+[![build status](https://gitlab.com/rocket-boosters/pipper/badges/main/pipeline.svg)](https://gitlab.com/rocket-boosters/pipper/commits/main)
+[![coverage report](https://gitlab.com/rocket-boosters/pipper/badges/main/coverage.svg)](https://gitlab.com/rocket-boosters/pipper/commits/main)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![Code style: flake8](https://img.shields.io/badge/code%20style-flake8-white)](https://gitlab.com/pycqa/flake8)
+[![Code style: mypy](https://img.shields.io/badge/code%20style-mypy-white)](http://mypy-lang.org/)
+[![PyPI - License](https://img.shields.io/pypi/l/pipper)](https://pypi.org/project/pipper/)
+
 __Private Python package manager on an S3 bucket__
 
-An experimental Python package manager wrapped around pip for lightweight
+A Python package manager wrapped around pip and poetry for lightweight
 management of non-public packages with an AWS S3 static backend. Requires no
 server or database resources, only a private S3 bucket that stores the pipper
 packages. Authentication is handled using standard AWS Identity and Access
@@ -15,6 +23,9 @@ The pipper package can be installed using pip:
 
     $ pip install pipper
 
+or with poetry:
+
+    $ poetry add pipper --dev
 
 ## Basic Usage
 
@@ -53,8 +64,8 @@ simplicity in cases where omitting the value is more difficult than including
 it with an explicit ignore value.
 
 
-__2. Pipper Configuration:__ Using pipper's _repository_ command action, you can store credentials and
-remote information in a pipper config file. If you do create a pipper
+__2. Pipper Configuration:__ Using pipper's _repository_ command action, you can store
+credentials and remote information in a pipper config file. If you do create a pipper
 repository configuration, which stores AWS credentials, you can reference
 that repository configuration by name to provide credentials to the 
 various commands with the `--repository` command flag:

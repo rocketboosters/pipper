@@ -1,31 +1,39 @@
 stages:
   - check
-  - broadcast
 
-pytest-py36:
-  image: python:3.6
+black-lint:
+  image: python:3.9
   stage: check
   script:
-    - export PYTHONPATH="${PYTHONPATH}:$(pwd)"
-    - pip install -r requirements.txt
-    - >
-      py.test
-      --cov-report term
-      --cov=pipper
-      .
+  - pip install black
+  - black --check .
 
-pytest-py37:
-  image: python:3.7
+flake8-lint:
+  image: python:3.9
   stage: check
   script:
-    - export PYTHONPATH="${PYTHONPATH}:$(pwd)"
-    - pip install -r requirements.txt
-    - pip install codecov coveralls codacy-coverage
+  - pip install flake8 flake8-black
+  - flake8 .
+
+mypy-lint:
+  image: python:3.9
+  stage: check
+  script:
+  - pip install mypy
+  - mypy . --ignore-missing-imports
+
+pytest-py38:
+  image: python:3.8
+  stage: check
+  script:
+    - pip install poetry
+    - poetry install
     - >
+      poetry run
       py.test
-      --cov-report xml:"$(pwd)/coverage.xml"
-      --cov-report term
-      --cov=pipper
+      --verbose
+      --cov-report term-missing
+      --cov=.
       .
   artifacts:
     paths:
@@ -33,31 +41,25 @@ pytest-py37:
       - coverage.xml
     expire_in: 1 day
 
-pytest-py38:
-  image: python:3.8
+pytest-py39:
+  image: python:3.9
   stage: check
   coverage: '/^TOTAL.*\s+\d+\s+\d+\s+(\d+)%/'
   script:
-    - export PYTHONPATH="${PYTHONPATH}:$(pwd)"
-    - pip install -r requirements.txt
+    - pip install poetry
+    - poetry install
     - >
+      poetry run
       py.test
-      --cov-report term
-      --cov=pipper
+      --verbose
+      --cov-report term-missing
+      --cov-report xml
+      --cov=.
       .
-
-codecov:
-  image: python:3.8
-  stage: broadcast
-  script:
-    - pip install codecov
-    - ls -la
-    - codecov
-
-coveralls:
-  image: python:3.8
-  stage: broadcast
-  script:
-    - pip install coveralls
-    - ls -la
-    - coveralls --verbose
+  artifacts:
+    reports:
+      cobertura: coverage.xml
+    paths:
+      - .coverage
+      - coverage.xml
+    expire_in: 1 day

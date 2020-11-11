@@ -20,10 +20,11 @@ class PatchSession:
 
     def __call__(self, test_function):
         """
-        Decorates the specified test function by returning a new function
+        Decorates the specified tests function by returning a new function
         that wraps it with patching in place for mocked phalanx functions.
         """
-        @patch('pipper.environment.get_session')
+
+        @patch("pipper.environment.get_session")
         def patch_session(get_session: MagicMock, *args, **kwargs):
             boto_mocks = _create_boto_mocks()
             get_session.return_value = boto_mocks.session
@@ -33,20 +34,14 @@ class PatchSession:
 
 
 def make_list_objects_response(
-        contents: list = None,
-        next_continuation_token: str = None
+    contents: list = None, next_continuation_token: str = None
 ) -> dict:
     """..."""
-    return dict(
-        Contents=contents or [],
-        NextContinuationToken=next_continuation_token
-    )
+    return dict(Contents=contents or [], NextContinuationToken=next_continuation_token)
 
 
 def _get_client(
-        mocked_clients: typing.Dict[str, MagicMock],
-        identifier: str,
-        **kwargs
+    mocked_clients: typing.Dict[str, MagicMock], identifier: str, **kwargs
 ) -> MagicMock:
     """..."""
     return mocked_clients.get(identifier) or MagicMock()
@@ -56,8 +51,5 @@ def _create_boto_mocks() -> BotoMocks:
     """..."""
     s3_client = MagicMock()
     session = MagicMock()
-    session.client.side_effect = functools.partial(
-        _get_client,
-        {'s3': s3_client}
-    )
+    session.client.side_effect = functools.partial(_get_client, {"s3": s3_client})
     return BotoMocks(session=session, s3_client=s3_client)  # noqa

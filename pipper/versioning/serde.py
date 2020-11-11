@@ -1,3 +1,5 @@
+import typing
+
 import semver
 
 
@@ -11,16 +13,16 @@ def explode(version_prefix: str) -> tuple:
         A semantic version or part of a semantic version, which can include
         wildcard characters.
     """
-    sections = []
-    remainder = version_prefix.rstrip('.')
-    for separator in ('+', '-'):
+    sections: typing.List[str] = []
+    remainder = version_prefix.rstrip(".")
+    for separator in ("+", "-"):
         parts = remainder.split(separator, 1)
         remainder = parts[0]
-        section = parts[1] if len(parts) == 2 else ''
+        section = parts[1] if len(parts) == 2 else ""
         sections.insert(0, section)
 
-    parts = remainder.split('.')
-    parts.extend(['', ''])
+    parts = remainder.split(".")
+    parts.extend(["", ""])
     sections = parts[:3] + sections
 
     return tuple(sections)
@@ -33,7 +35,7 @@ def serialize(version: str) -> str:
     ValueError will be raised.
     """
     try:
-        semver.parse_version_info(version)
+        semver.VersionInfo.parse(version)
     except ValueError:
         raise ValueError('Invalid semantic version "{}"'.format(version))
 
@@ -49,17 +51,17 @@ def serialize_prefix(version_prefix: str) -> str:
         A partial or complete semantic version to be converted into its
         URL/filesystem equivalent.
     """
-    if version_prefix.startswith('v'):
+    if version_prefix.startswith("v"):
         return version_prefix
 
-    sections = [part.replace('.', '_') for part in explode(version_prefix)]
-    prefix = '-'.join([section for section in sections[:3] if section])
+    sections = [part.replace(".", "_") for part in explode(version_prefix)]
+    prefix = "-".join([section for section in sections[:3] if section])
     if sections[3]:
-        prefix += '__pre_{}'.format(sections[3])
+        prefix += "__pre_{}".format(sections[3])
     if sections[4]:
-        prefix += '__build_{}'.format(sections[4])
+        prefix += "__build_{}".format(sections[4])
 
-    return 'v{}'.format(prefix) if prefix else ''
+    return "v{}".format(prefix) if prefix else ""
 
 
 def deserialize_prefix(safe_version_prefix: str) -> str:
@@ -71,30 +73,30 @@ def deserialize_prefix(safe_version_prefix: str) -> str:
         A partial or complete URL/filesystem safe version prefix to convert
         into a standard semantic version prefix.
     """
-    if not safe_version_prefix.startswith('v'):
+    if not safe_version_prefix.startswith("v"):
         return safe_version_prefix
 
     searches = [
-        ('__build_', 'split'),
-        ('__pre_', 'split'),
-        ('-', 'rsplit'),
-        ('-', 'rsplit')
+        ("__build_", "split"),
+        ("__pre_", "split"),
+        ("-", "rsplit"),
+        ("-", "rsplit"),
     ]
 
-    sections = []
-    remainder = safe_version_prefix.strip('v').rstrip('_')
+    sections: typing.List[str] = []
+    remainder = safe_version_prefix.strip("v").rstrip("_")
     for separator, operator in searches:
         parts = getattr(remainder, operator)(separator, 1)
         remainder = parts[0]
-        section = parts[1] if len(parts) == 2 else ''
-        sections.insert(0, section.replace('_', '.'))
+        section = parts[1] if len(parts) == 2 else ""
+        sections.insert(0, section.replace("_", "."))
     sections.insert(0, remainder)
 
-    prefix = '.'.join([section for section in sections[:3] if section])
+    prefix = ".".join([section for section in sections[:3] if section])
     if sections[3]:
-        prefix += '-{}'.format(sections[3])
+        prefix += "-{}".format(sections[3])
     if sections[4]:
-        prefix += '+{}'.format(sections[4])
+        prefix += "+{}".format(sections[4])
 
     return prefix
 
@@ -108,7 +110,7 @@ def deserialize(safe_version: str) -> str:
     result = deserialize_prefix(safe_version)
 
     try:
-        semver.parse_version_info(result)
+        semver.VersionInfo.parse(result)
     except ValueError:
         raise ValueError('Invalid semantic version "{}"'.format(result))
 

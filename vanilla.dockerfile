@@ -1,11 +1,13 @@
-FROM python:3.6
+FROM python:3.8
 
 RUN apt-get update \
  && apt-get install nano \
- && pip install pip --upgrade
+ && pip install pip poetry --upgrade
 
-COPY requirements.txt /root/requirements.txt
+WORKDIR "/root/pipper/"
 
-RUN pip install -r /root/requirements.txt
+COPY pyproject.toml /root/pipper/pyproject.toml
+COPY poetry.lock /root/pipper/poetry.lock
 
-WORKDIR "/root/"
+RUN poetry config virtualenvs.create false \
+ && poetry install

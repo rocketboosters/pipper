@@ -9,10 +9,10 @@ class RemoteVersion(object):
     """
 
     def __init__(
-            self,
-            bucket: str,
-            key: str,
-            url: str = None,
+        self,
+        bucket: str,
+        key: str,
+        url: str = None,
     ):
         """_ doc..."""
         self._key = key
@@ -33,19 +33,19 @@ class RemoteVersion(object):
         The top-level key prefix common to all packages in the given pipper
         repository. By default, the prefix is 'pipper'.
         """
-        return self._key.rsplit('/', 2)[0]
+        return self._key.rsplit("/", 2)[0]
 
     @property
     def package_name(self) -> str:
-        return self._key.strip('/').split('/')[1]
+        return self._key.strip("/").split("/")[1]
 
     @property
     def filename(self) -> str:
-        return self.key.rsplit('/', 1)[-1]
+        return self.key.rsplit("/", 1)[-1]
 
     @property
     def version(self) -> str:
-        return serde.deserialize(self.key.rsplit('/', 1)[-1].rsplit('.', 1)[0])
+        return serde.deserialize(self.key.rsplit("/", 1)[-1].rsplit(".", 1)[0])
 
     @property
     def is_url_based(self) -> bool:
@@ -53,41 +53,41 @@ class RemoteVersion(object):
 
     @property
     def safe_version(self) -> str:
-        return self.key.rsplit('/', 1)[-1].rsplit('.', 1)[0]
+        return self.key.rsplit("/", 1)[-1].rsplit(".", 1)[0]
 
     @property
     def url(self) -> str:
-        standard_url = '/'.join([
-            'https://s3.amazonaws.com',
-            self.bucket,
-            self.root_prefix,
-            self.package_name,
-            '{}.pipper'.format(self.safe_version)
-        ])
+        standard_url = "/".join(
+            [
+                "https://s3.amazonaws.com",
+                self.bucket,
+                self.root_prefix,
+                self.package_name,
+                "{}.pipper".format(self.safe_version),
+            ]
+        )
         return self._url or standard_url
 
     @property
     def is_prerelease(self) -> bool:
-        return self.version.find('-') != -1
+        return self.version.find("-") != -1
 
     def __lt__(self, other):
-        return semver.compare(self.version, other.version) < 0
+        return semver.VersionInfo.parse(self.version).compare(other.version) < 0
 
     def __le__(self, other):
-        return semver.compare(self.version, other.version) != 1
+        return semver.VersionInfo.parse(self.version).compare(other.version) != 1
 
     def __gt__(self, other):
-        return semver.compare(self.version, other.version) > 0
+        return semver.VersionInfo.parse(self.version).compare(other.version) > 0
 
     def __ge__(self, other):
-        return semver.compare(self.version, other.version) != -1
+        return semver.VersionInfo.parse(self.version).compare(other.version) != -1
 
     def __eq__(self, other):
-        return semver.compare(self.version, other.version) == 0
+        return semver.VersionInfo.parse(self.version).compare(other.version) == 0
 
     def __repr__(self):
-        return '<{} {}:{}>'.format(
-            self.__class__.__name__,
-            self.package_name,
-            self.version
+        return "<{} {}:{}>".format(
+            self.__class__.__name__, self.package_name, self.version
         )
