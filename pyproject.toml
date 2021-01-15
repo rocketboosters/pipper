@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pipper"
-version = "0.8.0"
+version = "0.8.1"
 description = "A serverless Python package manager for private packages that runs on S3."
 authors = ["Scott Ernst <swernst@gmail.com>"]
 license = "MIT"
@@ -22,7 +22,7 @@ classifiers = [
 exclude = ["pipper/tests"]
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = ">=3.8,<4.0.0"
 requests = ">=2.24.0"
 semver = ">=2.13.0"
 boto3 = ">=1.16.0"
@@ -42,7 +42,7 @@ coverage = "*"
 black = { version = "*", allow-prereleases = true }
 flake8-black = "*"
 taskipy = "*"
-lobotomy = "^0.1.10"
+lobotomy = ">=0.1.10"
 
 [tool.poetry.scripts]
 pipper = 'pipper.command:run'

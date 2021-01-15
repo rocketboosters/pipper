@@ -42,7 +42,12 @@ def status(package_name: str):
         raise
 
 
-def install_wheel(wheel_path: str, to_user: bool = False, target_directory: str = None):
+def install_wheel(
+    wheel_path: str,
+    to_user: bool = False,
+    target_directory: str = None,
+    dry_run: bool = False,
+):
     """
     Installs the specified wheel using the pip associated with the
     executing python.
@@ -60,12 +65,18 @@ def install_wheel(wheel_path: str, to_user: bool = False, target_directory: str 
     )
     print("[COMMAND]:\n", " ".join(cmd).replace(" --", "\n  --"))
 
-    result = subprocess.run(cmd)
-    result.check_returncode()
+    if dry_run:
+        print(f"[DRY_RUN]: Skipped wheel installation of {wheel_path}.")
+    else:
+        result = subprocess.run(cmd)
+        result.check_returncode()
 
 
 def install_pypi(
-    package_name: str, to_user: bool = False, target_directory: str = None
+    package_name: str,
+    to_user: bool = False,
+    target_directory: str = None,
+    dry_run: bool = False,
 ):
     """
     Installs the specified package from pypi using pip.
@@ -83,14 +94,18 @@ def install_pypi(
     )
     print("[COMMAND]:\n", " ".join(cmd).replace(" --", "\n  --"))
 
-    result = subprocess.run(cmd)
-    result.check_returncode()
+    if dry_run:
+        print(f"[DRY_RUN]: Skipped pypi installation of {package_name}.")
+    else:
+        result = subprocess.run(cmd)
+        result.check_returncode()
 
 
 def install_conda(
     package: typing.Union[str, dict],
     to_user: bool = False,
     target_directory: str = None,
+    dry_run: bool = False,
 ):
     """
     Installs the specified package using conda.
@@ -116,5 +131,8 @@ def install_conda(
     )
     print("[COMMAND]:\n", " ".join(cmd).replace(" --", "\n  --"))
 
-    result = subprocess.run(cmd)
-    result.check_returncode()
+    if dry_run:
+        print(f"[DRY_RUN]: Skipped conda installation of {name}.")
+    else:
+        result = subprocess.run(cmd)
+        result.check_returncode()

@@ -95,10 +95,22 @@ def populate_install(parser: ArgumentParser) -> ArgumentParser:
     parser.description = read_file("resources", "install_action.txt")
 
     parser.add_argument("packages", nargs="*")
-
     parser.add_argument("-i", "--input", dest="configs_path")
-
     parser.add_argument("--user", default=False, action="store_true", dest="pip_user")
+    parser.add_argument(
+        "--dev",
+        action="store_true",
+        help="""
+            Only significant when combined with the `--input` flag, this will instruct
+            pipper to install from "dev_dependencies" instead of "dependencies" within
+            the pipper.json source file.
+            """,
+    )
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Echoes the intended installation process without carrying it out.",
+    )
 
     parser.add_argument(
         "-t",
@@ -217,7 +229,15 @@ def populate_download(parser: ArgumentParser) -> ArgumentParser:
     parser.add_argument("-d", "--directory", dest="save_directory")
 
     parser.add_argument("-i", "--input", dest="configs_path")
-
+    parser.add_argument(
+        "--dev",
+        action="store_true",
+        help="""
+            Only significant when combined with the `--input` flag, this will instruct
+            pipper to download from "dev_dependencies" instead of "dependencies" within
+            the pipper.json source file.
+            """,
+    )
     parser.add_argument(
         "-e", "--extract", dest="extract", action="store_true", default=False
     )
@@ -267,7 +287,15 @@ def populate_authorize(parser: ArgumentParser) -> ArgumentParser:
     parser.add_argument("-o", "--output", dest="save_path")
 
     parser.add_argument("-i", "--input", dest="configs_path")
-
+    parser.add_argument(
+        "--dev",
+        action="store_true",
+        help="""
+            Only significant when combined with the `--input` flag, this will instruct
+            pipper to authorize from "dev_dependencies" instead of "dependencies" within
+            the pipper.json source file.
+            """,
+    )
     parser.add_argument("-e", "--expires", dest="expires_in", default=10)
 
     parser.add_argument(

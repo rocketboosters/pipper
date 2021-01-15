@@ -125,11 +125,14 @@ def get_session(
     ]
 
     default_repo_aws_profile = default_repository.get("profile")
+
     default_repository_credentials = [
         default_repository.get("access_key_id"),
         default_repository.get("secret_access_key"),
         default_repository.get("session_token"),
     ]
+
+    default_aws_profile = os.environ.get("AWS_DEFAULT_PROFILE")
 
     specific_credentials = [
         os.environ.get("PIPPER_AWS_ACCESS_KEY_ID"),
@@ -152,6 +155,7 @@ def get_session(
         yield s3.session_from_credentials_list(env_credentials)
         yield s3.session_from_profile_name(default_repo_aws_profile)
         yield s3.session_from_credentials_list(default_repository_credentials)
+        yield s3.session_from_profile_name(default_aws_profile)
         yield boto3.Session()
 
     session = next(s for s in generate_session() if s is not None)

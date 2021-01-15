@@ -103,7 +103,8 @@ def run(env: Environment):
         urls = create_many_urls(env, package_ids)
     else:
         configs = environment.load_configs(env.args.get("configs_path"))
-        urls = create_many_urls(env, configs.get("dependencies") or [])
+        prefix = "dev_" if env.args.get("dev") else ""
+        urls = create_many_urls(env, configs.get(f"{prefix}dependencies") or [])
 
     if env.quiet:
         print(" ".join(urls.values()))

@@ -171,7 +171,8 @@ def download_many(env: Environment, package_ids: list) -> dict:
 def download_from_configs(env: Environment, configs_path: str = None) -> dict:
     """..."""
     configs = environment.load_configs(configs_path)
-    return download_many(env, configs.get("dependencies") or [])
+    prefix = "dev_" if env.args.get("dev") else ""
+    return download_many(env, configs.get(f"{prefix}dependencies") or [])
 
 
 def run(env: Environment):

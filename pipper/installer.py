@@ -11,7 +11,10 @@ from pipper.environment import Environment
 
 
 def install_pipper_file(
-    local_source_path: str, to_user: bool = False, target_directory: str = None
+    local_source_path: str,
+    to_user: bool = False,
+    target_directory: str = None,
+    dry_run: bool = False,
 ) -> dict:
     """
     Installs the specified local pipper bundle file.
@@ -34,6 +37,7 @@ def install_pipper_file(
             wheel_path=extracted["wheel_path"],
             to_user=to_user,
             target_directory=target_directory,
+            dry_run=dry_run,
         )
         return extracted["metadata"]
     except Exception:
@@ -128,6 +132,7 @@ def install(env: Environment, package_id: str):
             local_source_path=path,
             to_user=env.args.get("pip_user", False),
             target_directory=env.args.get("target_directory"),
+            dry_run=bool(env.args.get("dry_run")),
         )
     except Exception:
         raise
@@ -176,15 +181,20 @@ def install_from_configs(env: Environment, configs_path: str = None):
             package_name=package,
             to_user=to_user or False,
             target_directory=target_directory,
+            dry_run=bool(env.args.get("dry_run")),
         )
 
     for package in configs.get("conda", []):
         print("\n=== CONDA {} ===".format(package))
         wrapper.install_conda(
-            package=package, to_user=to_user or False, target_directory=target_directory
+            package=package,
+            to_user=to_user or False,
+            target_directory=target_directory,
+            dry_run=bool(env.args.get("dry_run")),
         )
 
-    return install_many(env, configs.get("dependencies"))
+    prefix = "dev_" if env.args.get("dev") else ""
+    return install_many(env, configs.get(f"{prefix}dependencies"))
 
 
 def run(env: Environment):
