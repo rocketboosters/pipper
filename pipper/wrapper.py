@@ -6,11 +6,12 @@ import typing
 import pkg_resources
 
 from pipper import versioning
+from pipper.environment import Environment
 
 
-def update_required(package_name: str, install_version: str) -> bool:
+def update_required(env: Environment, package_name: str, install_version: str) -> bool:
     """ """
-    existing = status(package_name)
+    existing = status(env, package_name)
 
     if not existing:
         return True
@@ -32,8 +33,16 @@ def clean_path(path: str) -> str:
     return os.path.realpath(path)
 
 
-def status(package_name: str):
-    """ """
+def status(env: Environment, package_name: str):
+    """..."""
+    if env.target_directory:
+        finder = (
+            p
+            for p in pkg_resources.find_distributions(str(env.target_directory), True)
+            if p.project_name == package_name
+        )
+        return next(finder, None)
+
     try:
         return pkg_resources.get_distribution(package_name)
     except pkg_resources.DistributionNotFound:

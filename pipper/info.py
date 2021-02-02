@@ -20,11 +20,11 @@ def get_package_metadata(env: Environment, package_name: str, package_version: s
     return {key: value for key, value in response["Metadata"].items()}
 
 
-def print_local_only(package_name: str):
+def print_local_only(env: Environment, package_name: str):
     """ """
     print("[PACKAGE]: {}".format(package_name))
 
-    local_data = wrapper.status(package_name)
+    local_data = wrapper.status(env, package_name)
     if local_data is None:
         print("[MISSING]: The package is not installed locally")
         return
@@ -41,7 +41,7 @@ def print_with_remote(env: Environment, package_name: str):
     except IndexError:
         latest = dict(version="None", timestamp="Never")
 
-    local_data = wrapper.status(package_name)
+    local_data = wrapper.status(env, package_name)
     comparison = (
         0
         if local_data is None
@@ -84,5 +84,5 @@ def run(env: Environment):
     package_name = env.args.get("package_name", "unknown")
 
     if local_only:
-        return print_local_only(package_name)
+        return print_local_only(env, package_name)
     return print_with_remote(env, package_name)

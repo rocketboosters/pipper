@@ -1,5 +1,6 @@
-import os
 import json
+import os
+import pathlib
 import typing
 
 import boto3
@@ -16,14 +17,21 @@ REPOSITORY_CONFIGS_PATH = os.path.join(
 class Environment:
     def __init__(self, args: dict = None):
         self.args = clean_args(args or {})
-
         repository = load_repository(self.args.get("repository_name"))
         default_repository = load_repository(None, True)
         self.repository = repository or default_repository
-
         self.aws_session = get_session(self.args, repository, default_repository)
+        self.s3_client: BaseClient = self.aws_session.client("s3")
 
-        self.s3_client = self.aws_session.client("s3")  # type: BaseClient
+    @property
+    def target_directory(self) -> typing.Optional[pathlib.Path]:
+        """
+        Specifies the directory in which the action will take place for non-standard
+        installation locations.
+        """
+        if d := self.args.get("target_directory"):
+            return pathlib.Path(d).expanduser().absolute()
+        return None
 
     @property
     def quiet(self) -> bool:

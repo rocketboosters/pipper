@@ -67,7 +67,7 @@ def parse_package_id(
                 env, *package_parts, include_prereleases=unstable
             ).version
         if not upgrade:
-            existing = wrapper.status(name)
+            existing = wrapper.status(env, name)
             yield existing.version if existing else None
         yield versioning.find_latest_match(
             env, name, include_prereleases=unstable

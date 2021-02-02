@@ -61,9 +61,9 @@ def install_dependencies(env: Environment, dependencies: typing.List[str]):
     def do_install(package_name: str):
         try:
             data = downloader.parse_package_id(env, package_name)
-            existing = wrapper.status(data["name"])
+            existing = wrapper.status(env, data["name"])
         except Exception:
-            existing = wrapper.status(package_name)
+            existing = wrapper.status(env, package_name)
         return install(env, package_name) if not existing else None
 
     for name in dependencies:
@@ -85,7 +85,7 @@ def install(env: Environment, package_id: str):
     data = downloader.parse_package_id(env, package_id)
     is_url = "url" in data
 
-    if not upgrade and not data["version"] and wrapper.status(data["name"]):
+    if not upgrade and not data["version"] and wrapper.status(env, data["name"]):
         print(
             (
                 '[SKIPPED]: "{}" already installed. '
@@ -95,7 +95,7 @@ def install(env: Environment, package_id: str):
         )
         return
 
-    if not wrapper.update_required(data["name"], data["version"]):
+    if not wrapper.update_required(env, data["name"], data["version"]):
         print(
             '[SKIPPED]: "{}" already installed at version {}'.format(
                 data["name"], data["version"]

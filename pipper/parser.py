@@ -217,6 +217,19 @@ def populate_info(parser: ArgumentParser) -> ArgumentParser:
         help="Only get local package information",
     )
 
+    parser.add_argument(
+        "-t",
+        "--target",
+        dest="target_directory",
+        metavar="<dir>",
+        help=(
+            "Looks for the package in the specified location instead of using"
+            "the standard sys.path lookup. This makes it possible to inspect"
+            "alternate installation location installations without the host"
+            "environment interfering with the output."
+        ),
+    )
+
     return populate_with_credentials(parser)
 
 
