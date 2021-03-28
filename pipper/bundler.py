@@ -5,12 +5,15 @@ import tempfile
 import time
 import zipfile
 from datetime import datetime
-from distutils.core import run_setup
 import pathlib
 import subprocess
 import toml
 
 from setuptools.dist import Distribution
+
+# distutils imported after setuptools to avoid setuptools littering the screen
+# with warnings about not being imported first
+from distutils.core import run_setup
 
 from pipper import versioning
 from pipper.environment import Environment
