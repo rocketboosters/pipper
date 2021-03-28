@@ -345,7 +345,11 @@ def parse(cli_args: list = None) -> dict:
         help="Show the pipper version information and then exit",
     )
 
-    subparsers = parser.add_subparsers(help="Command actions", dest="action")
+    subparsers = parser.add_subparsers(
+        help="Command actions",
+        dest="action",
+        required=True,
+    )
 
     parsers = [
         populate_install(subparsers.add_parser("install")),
