@@ -76,13 +76,12 @@ def create_meta(
     """
 
     config_path = os.path.join(package_directory, "pipper.json")
-    if not os.path.exists(config_path):
-        raise FileNotFoundError(
-            'Missing pipper config file at "{}"'.format(config_path)
-        )
 
-    with open(config_path, "r") as f:
-        metadata = json.load(f)  # type: dict
+    try:
+        with open(config_path, "r") as f:
+            metadata = json.load(f)  # type: dict
+    except FileNotFoundError:
+        metadata = {}
 
     metadata.update(
         dict(
