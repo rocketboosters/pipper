@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pipper"
-version = "0.9.0"
+version = "0.10.0"
 description = "A serverless Python package manager for private packages that runs on S3."
 authors = ["Scott Ernst <swernst@gmail.com>"]
 license = "MIT"
@@ -30,7 +30,6 @@ pip = "*"
 wheel = "*"
 setuptools = "*"
 toml = "*"
-poetry = "*"
 
 [tool.poetry.dev-dependencies]
 pytest = "*"
