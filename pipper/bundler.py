@@ -1,19 +1,20 @@
 import json
 import os
+import pathlib
 import shutil
+import subprocess
 import tempfile
 import time
 import zipfile
 from datetime import datetime
-import pathlib
-import subprocess
-import toml
-
-from setuptools.dist import Distribution
 
 # distutils imported after setuptools to avoid setuptools littering the screen
 # with warnings about not being imported first
 from distutils.core import run_setup
+
+import toml
+
+from distutils.dist import Distribution
 
 from pipper import versioning
 from pipper.environment import Environment
@@ -79,7 +80,7 @@ def create_meta(
 
     try:
         with open(config_path, "r") as f:
-            metadata = json.load(f)  # type: dict
+            metadata: dict = json.load(f)
     except FileNotFoundError:
         metadata = {}
 
@@ -110,10 +111,10 @@ def _create_setup_py_wheel(setup_path: str, bundle_directory: str) -> dict:
     :param bundle_directory:
         Directory where bundling into a wheel should be carried out.
     """
-    result = run_setup(
+    result: Distribution = run_setup(
         script_name=setup_path,
         script_args=["bdist_wheel", "--universal", "-d", bundle_directory],
-    )  # type: Distribution
+    )
 
     # Pause to make sure OS releases wheel file before moving it
     time.sleep(1)
@@ -125,12 +126,13 @@ def _create_setup_py_wheel(setup_path: str, bundle_directory: str) -> dict:
     wheel_path = os.path.join(bundle_directory, "package.whl")
     shutil.move(os.path.join(bundle_directory, wheel_filename), wheel_path)
 
+    metadata = result.metadata
     return dict(
         wheel_path=wheel_path,
         wheel_name=wheel_filename,
-        package_name=result.get_name(),
-        version=result.get_version(),
-        safe_version=versioning.serialize(result.get_version()),
+        package_name=metadata.get_name(),
+        version=metadata.get_version(),
+        safe_version=versioning.serialize(metadata.get_version()),
     )
 
 

@@ -8,13 +8,15 @@ from pipper import environment
 from pipper import s3
 from pipper import wrapper
 from pipper.environment import Environment
+from typing import Optional
 
 
 def install_pipper_file(
     local_source_path: str,
     to_user: bool = False,
-    target_directory: str = None,
+    target_directory: Optional[str] = None,
     dry_run: bool = False,
+    use_pip_legacy_resolver: bool = False,
 ) -> dict:
     """
     Installs the specified local pipper bundle file.
@@ -26,6 +28,11 @@ def install_pipper_file(
         user package, the package will be installed globally.
     :param target_directory:
         Alternate installation location if specified.
+    :param dry_run:
+        Whether to install the package or not. Dry run will just print what would have
+        happened.
+    :param use_pip_legacy_resolver:
+        Whether to use pip legacy resolver.
     :return
         The package metadata from the pipper bundle
     """
@@ -38,6 +45,7 @@ def install_pipper_file(
             to_user=to_user,
             target_directory=target_directory,
             dry_run=dry_run,
+            use_pip_legacy_resolver=use_pip_legacy_resolver,
         )
         return extracted["metadata"]
     except Exception:
@@ -133,6 +141,7 @@ def install(env: Environment, package_id: str):
             to_user=env.args.get("pip_user", False),
             target_directory=env.args.get("target_directory"),
             dry_run=bool(env.args.get("dry_run")),
+            use_pip_legacy_resolver=env.args.get("use_pip_legacy_resolver") or False,
         )
     except Exception:
         raise
@@ -158,7 +167,7 @@ def install_many(env: Environment, package_ids: typing.List[str]):
         install(env, package_id)
 
 
-def install_from_configs(env: Environment, configs_path: str = None):
+def install_from_configs(env: Environment, configs_path: Optional[str] = None):
     """
     Installs pipper dependencies specified in a pipper configs file. If the
     path to the configs file is not specified, the default path will be used
@@ -173,6 +182,7 @@ def install_from_configs(env: Environment, configs_path: str = None):
     """
     to_user = env.args.get("pip_user")
     target_directory = env.args.get("target_directory")
+    use_pip_legacy_resolver = env.args.get("use_pip_legacy_resolver") or False
     configs = environment.load_configs(configs_path)
 
     for package in configs.get("pypi", []):
@@ -182,6 +192,7 @@ def install_from_configs(env: Environment, configs_path: str = None):
             to_user=to_user or False,
             target_directory=target_directory,
             dry_run=bool(env.args.get("dry_run")),
+            use_pip_legacy_resolver=use_pip_legacy_resolver,
         )
 
     for package in configs.get("conda", []):

@@ -10,6 +10,7 @@ from pipper import environment
 from pipper import versioning
 from pipper import wrapper
 from pipper.environment import Environment
+from typing import Optional
 
 
 def parse_package_id(
@@ -109,7 +110,9 @@ def save(url: str, local_path: str) -> str:
     return local_path
 
 
-def extract_pipper_file(local_bundle_path: str, extract_directory: str = None) -> dict:
+def extract_pipper_file(
+    local_bundle_path: str, extract_directory: Optional[str] = None
+) -> dict:
     """ """
 
     directory = extract_directory or os.path.dirname(local_bundle_path)
@@ -168,7 +171,7 @@ def download_many(env: Environment, package_ids: list) -> dict:
     return {pid: download_package(env, pid) for pid in package_ids}
 
 
-def download_from_configs(env: Environment, configs_path: str = None) -> dict:
+def download_from_configs(env: Environment, configs_path: Optional[str] = None) -> dict:
     """..."""
     configs = environment.load_configs(configs_path)
     prefix = "dev_" if env.args.get("dev") else ""

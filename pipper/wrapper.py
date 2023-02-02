@@ -7,6 +7,7 @@ import pkg_resources
 
 from pipper import versioning
 from pipper.environment import Environment
+from typing import Optional
 
 
 def update_required(env: Environment, package_name: str, install_version: str) -> bool:
@@ -54,8 +55,9 @@ def status(env: Environment, package_name: str):
 def install_wheel(
     wheel_path: str,
     to_user: bool = False,
-    target_directory: str = None,
+    target_directory: Optional[str] = None,
     dry_run: bool = False,
+    use_pip_legacy_resolver: bool = False,
 ):
     """
     Installs the specified wheel using the pip associated with the
@@ -68,6 +70,9 @@ def install_wheel(
         "install",
         wheel_path,
     ]
+    if use_pip_legacy_resolver:
+        cmd.append("--use-deprecated=legacy-resolver")
+
     cmd += ["--user"] if to_user else []
     cmd += (
         ["--target={}".format(clean_path(target_directory))] if target_directory else []
@@ -84,8 +89,9 @@ def install_wheel(
 def install_pypi(
     package_name: str,
     to_user: bool = False,
-    target_directory: str = None,
+    target_directory: Optional[str] = None,
     dry_run: bool = False,
+    use_pip_legacy_resolver: bool = False,
 ):
     """
     Installs the specified package from pypi using pip.
@@ -97,6 +103,9 @@ def install_pypi(
         "install",
         package_name,
     ]
+    if use_pip_legacy_resolver:
+        cmd.append("--use-deprecated=legacy-resolver")
+
     cmd += ["--user"] if to_user else []
     cmd += (
         ["--target={}".format(clean_path(target_directory))] if target_directory else []
@@ -113,7 +122,7 @@ def install_pypi(
 def install_conda(
     package: typing.Union[str, dict],
     to_user: bool = False,
-    target_directory: str = None,
+    target_directory: Optional[str] = None,
     dry_run: bool = False,
 ):
     """

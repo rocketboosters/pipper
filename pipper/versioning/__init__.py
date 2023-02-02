@@ -9,6 +9,7 @@ from pipper.versioning.serde import deserialize_prefix  # noqa
 from pipper.versioning.serde import explode  # noqa
 from pipper.versioning.serde import serialize  # noqa
 from pipper.versioning.serde import serialize_prefix  # noqa
+from typing import Optional
 
 
 def to_remote_version(
@@ -61,7 +62,7 @@ def make_s3_key(
 def list_versions(
     environment: Environment,
     package_name: str,
-    version_prefix: str = None,
+    version_prefix: Optional[str] = None,
     include_prereleases: bool = False,
     reverse: bool = False,
 ) -> typing.List[RemoteVersion]:
@@ -167,7 +168,7 @@ def compare_constraint(version: str, constraint: str) -> int:
 def find_latest_match(
     environment: Environment,
     package_name: str,
-    version_constraint: str = None,
+    version_constraint: Optional[str] = None,
     include_prereleases: bool = False,
 ) -> typing.Union[RemoteVersion, None]:
     """

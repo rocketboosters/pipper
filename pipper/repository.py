@@ -2,9 +2,10 @@ import copy
 
 from pipper import environment
 from pipper.environment import Environment
+from typing import Optional
 
 
-def explode_credentials(credentials: list = None) -> dict:
+def explode_credentials(credentials: Optional[list] = None) -> dict:
     """..."""
     if not credentials or not len(credentials) > 2:
         return {}

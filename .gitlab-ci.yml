@@ -58,7 +58,9 @@ pytest-py39:
       .
   artifacts:
     reports:
-      cobertura: coverage.xml
+      coverage_report:
+        coverage_format: cobertura
+        path: coverage.xml
     paths:
       - .coverage
       - coverage.xml

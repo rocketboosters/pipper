@@ -8,6 +8,7 @@ from botocore.client import BaseClient
 from botocore.credentials import Credentials
 
 from pipper import s3
+from typing import Optional
 
 REPOSITORY_CONFIGS_PATH = os.path.join(
     os.path.expanduser("~"), ".pipper", "repositories.json"
@@ -15,7 +16,7 @@ REPOSITORY_CONFIGS_PATH = os.path.join(
 
 
 class Environment:
-    def __init__(self, args: dict = None):
+    def __init__(self, args: Optional[dict] = None):
         self.args = clean_args(args or {})
         repository = load_repository(self.args.get("repository_name"))
         default_repository = load_repository(None, True)
@@ -104,7 +105,7 @@ def load_repository(
         return {}
 
 
-def load_configs(configs_path: str = None):
+def load_configs(configs_path: Optional[str] = None):
     """ """
     path = os.path.realpath(configs_path or os.path.join(os.curdir, "pipper.json"))
 

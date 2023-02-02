@@ -10,6 +10,7 @@ from pipper import parser
 from pipper import publisher
 from pipper import repository
 from pipper.environment import Environment
+from typing import Optional
 
 ACTIONS = dict(
     authorize=authorizer.run,
@@ -30,7 +31,7 @@ def show_version(env: Environment):
         print("Version: {}".format(pipper.__version__))
 
 
-def run(cli_args: list = None):
+def run(cli_args: Optional[list] = None):
     """Executes the command based on command line arguments."""
     args = parser.parse(cli_args)
     env = Environment(args)

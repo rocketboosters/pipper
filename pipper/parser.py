@@ -1,6 +1,7 @@
 import argparse
 import os
 from argparse import ArgumentParser
+from typing import Optional
 
 package_directory = os.path.dirname(os.path.realpath(__file__))
 
@@ -136,6 +137,16 @@ def populate_install(parser: ArgumentParser) -> ArgumentParser:
         action="store_true",
         default=False,
         help="Upgrade existing packages to latest version",
+    )
+    parser.add_argument(
+        "--use-pip-legacy-resolver",
+        dest="use_pip_legacy_resolver",
+        action="store_true",
+        default=False,
+        help=(
+            "Use pip legacy version resolver. Used when the new resolver can find the"
+            " right version quickly enough."
+        ),
     )
 
     return populate_with_credentials(parser)
@@ -323,7 +334,7 @@ def populate_authorize(parser: ArgumentParser) -> ArgumentParser:
     return populate_with_credentials(parser)
 
 
-def parse(cli_args: list = None) -> dict:
+def parse(cli_args: Optional[list] = None) -> dict:
     """
     Parses command line arguments for consumption by the invoked action
     and returns the parsed arguments as a dictionary.

@@ -1,6 +1,7 @@
 import semver
 
 from pipper.versioning import serde
+from typing import Optional
 
 
 class RemoteVersion(object):
@@ -12,7 +13,7 @@ class RemoteVersion(object):
         self,
         bucket: str,
         key: str,
-        url: str = None,
+        url: Optional[str] = None,
     ):
         """_ doc..."""
         self._key = key
