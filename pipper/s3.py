@@ -26,7 +26,7 @@ def session_from_credentials_list(
 
 
 def session_from_profile_name(
-    profile_name: typing.Union[str, None]
+    profile_name: typing.Union[str, None],
 ) -> typing.Union[boto3.Session, None]:
     """ """
 
