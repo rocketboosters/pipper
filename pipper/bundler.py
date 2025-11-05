@@ -11,10 +11,9 @@ from datetime import datetime
 # distutils imported after setuptools to avoid setuptools littering the screen
 # with warnings about not being imported first
 from distutils.core import run_setup
+from distutils.dist import Distribution
 
 import toml
-
-from distutils.dist import Distribution
 
 from pipper import versioning
 from pipper.environment import Environment
@@ -167,11 +166,20 @@ def _create_poetry_wheel(package_directory: str, bundle_directory: str) -> dict:
     shutil.move(str(dist_directory.joinpath(wheel_filename)), wheel_path)
 
     configs = toml.loads(directory.joinpath("pyproject.toml").read_text())
-    version = configs["tool"]["poetry"]["version"]
+    try:
+        version = configs["tool"]["poetry"]["version"]
+    except KeyError:
+        version = configs["project"]["version"]
+
+    try:
+        name = configs["tool"]["poetry"]["name"]
+    except KeyError:
+        name = configs["project"]["name"]
+
     return dict(
         wheel_path=wheel_path,
         wheel_name=wheel_filename,
-        package_name=configs["tool"]["poetry"]["name"],
+        package_name=name,
         version=version,
         safe_version=versioning.serialize(version),
     )
