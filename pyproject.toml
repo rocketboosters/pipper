@@ -31,7 +31,7 @@ wheel = "*"
 setuptools = "*"
 toml = "*"
 
-[tool.poetry.dev-dependencies]
+[tool.poetry.group.dev.dependencies]
 pytest = "*"
 pytest-runner = "*"
 pytest-cov = "*"
@@ -49,7 +49,7 @@ pipper = 'pipper.command:run'
 [tool.taskipy.tasks]
 # https://github.com/illBeRoy/taskipy
 black = "black ."
-mypy = "poetry run mypy ./pipper/ --ignore-missing-imports"
+mypy = "poetry run mypy ./pipper/ --ignore-missing-imports --explicit-package-bases --install-types --non-interactive"
 flake8 = "flake8 ."
 test = "pytest . --cov-report=term-missing --cov=."
 lint = "task black && task flake8 && task mypy"
