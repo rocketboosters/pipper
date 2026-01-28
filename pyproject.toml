@@ -48,6 +48,7 @@ dev = [
     "types-toml",
     "types-requests",
     "types-PyYAML",
+    "poetry",
 ]
 
 [project.urls]

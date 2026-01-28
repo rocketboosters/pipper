@@ -1,0 +1,17 @@
+[project]
+name = "hello-pipper-uv"
+version = "0.0.0"
+description = "Test example for bundling uv projects."
+authors = [
+    {name = "Foo Bar", email = "foo@bar.com"}
+]
+requires-python = ">=3.8"
+dependencies = [
+    "requests>=2.24.0",
+    "semver>=2.13.0",
+    "boto3>=1.16.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

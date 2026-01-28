@@ -66,6 +66,34 @@ def test_bundle_poetry():
         shutil.rmtree(directory)
 
 
+def test_bundle_uv():
+    """
+    Should successfully bundle the hello_pipper_uv project into a pipper
+    file in a temporary directory and verify that file exists.
+    """
+    current_directory = pathlib.Path(os.curdir).absolute()
+    directory = tempfile.mkdtemp()
+    os.chdir(directory)
+
+    project_directory = SCENARIO_DIRECTORY.joinpath("hello_pipper_uv")
+    try:
+        command.run(
+            [
+                "bundle",
+                f"--output={str(directory)}",
+                str(project_directory),
+            ]
+        )
+        filename = next(
+            (x for x in os.listdir(directory) if x.endswith(".pipper")), None
+        )
+        assert filename
+        assert filename.startswith("hello-pipper-uv-v")
+    finally:
+        os.chdir(str(current_directory))
+        shutil.rmtree(directory)
+
+
 def test_bundle_without_pipper_dot_json():
     """
     Should be able to successfully bundle the hello_pipper project into a
