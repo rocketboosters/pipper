@@ -132,6 +132,8 @@ def _create_setup_py_wheel(setup_path: str, bundle_directory: str) -> dict:
     wheel_info = Wheel(original_wheel_path)
     package_name = wheel_info.name
     version = wheel_info.version
+    if not version:
+        raise ValueError("Unable to extract version information from wheel.")
 
     # Now move the wheel to the bundle directory
     wheel_path = os.path.join(bundle_directory, "package.whl")
