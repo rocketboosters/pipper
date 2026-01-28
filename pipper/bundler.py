@@ -6,14 +6,11 @@ import subprocess
 import tempfile
 import time
 import zipfile
+from datetime import UTC
 from datetime import datetime
 
-# distutils imported after setuptools to avoid setuptools littering the screen
-# with warnings about not being imported first
-from distutils.core import run_setup
-from distutils.dist import Distribution
-
 import toml
+from pkginfo import Wheel
 
 from pipper import versioning
 from pipper.environment import Environment
@@ -89,7 +86,7 @@ def create_meta(
             "wheel_name": distribution_data["wheel_name"],
             "version": distribution_data["version"],
             "safe_version": distribution_data["safe_version"],
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
         }
     )
 
@@ -110,28 +107,42 @@ def _create_setup_py_wheel(setup_path: str, bundle_directory: str) -> dict:
     :param bundle_directory:
         Directory where bundling into a wheel should be carried out.
     """
-    result: Distribution = run_setup(
-        script_name=setup_path,
-        script_args=["bdist_wheel", "--universal", "-d", bundle_directory],
-    )
+    package_directory = pathlib.Path(setup_path).parent.absolute()
+    dist_directory = package_directory.joinpath("dist")
+
+    starting_directory = pathlib.Path(".").absolute()
+    os.chdir(str(package_directory))
+
+    # Use python -m build instead of deprecated run_setup
+    command = ["python", "-m", "build", "--wheel", "--outdir", str(dist_directory)]
+    result = subprocess.run(command)
+    os.chdir(str(starting_directory))
+    result.check_returncode()
 
     # Pause to make sure OS releases wheel file before moving it
     time.sleep(1)
 
     wheel_files = [
-        name for name in os.listdir(bundle_directory) if name.endswith(".whl")
+        name for name in os.listdir(str(dist_directory)) if name.endswith(".whl")
     ]
     wheel_filename = wheel_files[0]
-    wheel_path = os.path.join(bundle_directory, "package.whl")
-    shutil.move(os.path.join(bundle_directory, wheel_filename), wheel_path)
+    original_wheel_path = str(dist_directory.joinpath(wheel_filename))
 
-    metadata = result.metadata
+    # Extract metadata from the wheel file before renaming
+    wheel_info = Wheel(original_wheel_path)
+    package_name = wheel_info.name
+    version = wheel_info.version
+
+    # Now move the wheel to the bundle directory
+    wheel_path = os.path.join(bundle_directory, "package.whl")
+    shutil.move(original_wheel_path, wheel_path)
+
     return {
         "wheel_path": wheel_path,
         "wheel_name": wheel_filename,
-        "package_name": metadata.get_name(),
-        "version": metadata.get_version(),
-        "safe_version": versioning.serialize(metadata.get_version()),
+        "package_name": package_name,
+        "version": version,
+        "safe_version": versioning.serialize(version),
     }
 
 

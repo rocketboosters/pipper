@@ -1,8 +1,11 @@
 import os
 import subprocess
 import sys
+from importlib.metadata import PackageNotFoundError
+from importlib.metadata import distributions
+from importlib.metadata import version as get_version
 
-import pkg_resources
+from packaging.version import parse as parse_version
 
 from pipper import versioning
 from pipper.environment import Environment
@@ -21,8 +24,8 @@ def update_required(env: Environment, package_name: str, install_version: str) -
         else install_version
     )
 
-    current = pkg_resources.parse_version(existing.version)
-    target = pkg_resources.parse_version(version)
+    current = parse_version(existing.version)
+    target = parse_version(version)
     return current != target
 
 
@@ -35,16 +38,33 @@ def clean_path(path: str) -> str:
 def status(env: Environment, package_name: str):
     """..."""
     if env.target_directory:
-        finder = (
-            p
-            for p in pkg_resources.find_distributions(str(env.target_directory), True)
-            if p.project_name == package_name
-        )
-        return next(finder, None)
+        # importlib.metadata.distributions doesn't support path parameter,
+        # so we need to temporarily modify sys.path
+        import sys
+
+        target_path = str(env.target_directory)
+        if target_path not in sys.path:
+            sys.path.insert(0, target_path)
+            try:
+                finder = (p for p in distributions() if p.name == package_name)
+                return next(finder, None)
+            finally:
+                sys.path.remove(target_path)
+        else:
+            finder = (p for p in distributions() if p.name == package_name)
+            return next(finder, None)
 
     try:
-        return pkg_resources.get_distribution(package_name)
-    except pkg_resources.DistributionNotFound:
+        # Return a simple object with version attribute
+        class Distribution:
+            def __init__(self, name, ver):
+                self.name = name
+                self.version = ver
+                self.project_name = name
+
+        ver = get_version(package_name)
+        return Distribution(package_name, ver)
+    except PackageNotFoundError:
         return None
     except Exception:
         raise

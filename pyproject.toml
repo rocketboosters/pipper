@@ -9,7 +9,7 @@ description = "A serverless Python package manager for private packages that run
 authors = [
     {name = "Scott Ernst", email = "swernst@gmail.com"}
 ]
-license = {text = "MIT"}
+license = "MIT"
 readme = "README.md"
 requires-python = ">=3.11"
 keywords = ["aws", "python", "package manager", "s3", "serverless"]
@@ -17,7 +17,6 @@ classifiers = [
     "Development Status :: 4 - Beta",
     "Environment :: Console",
     "Intended Audience :: Developers",
-    "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
@@ -31,6 +30,9 @@ dependencies = [
     "pip",
     "wheel",
     "setuptools",
+    "build",
+    "pkginfo",
+    "packaging",
     "toml",
     "taskipy>=1.14.1",
 ]
