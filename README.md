@@ -1,16 +1,15 @@
 # Pipper
 
 [![PyPI version](https://badge.fury.io/py/pipper.svg)](https://pypi.org/project/pipper/)
-[![build status](https://gitlab.com/rocket-boosters/pipper/badges/main/pipeline.svg)](https://gitlab.com/rocket-boosters/pipper/commits/main)
-[![coverage report](https://gitlab.com/rocket-boosters/pipper/badges/main/coverage.svg)](https://gitlab.com/rocket-boosters/pipper/commits/main)
-[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
-[![Code style: flake8](https://img.shields.io/badge/code%20style-flake8-white)](https://gitlab.com/pycqa/flake8)
+[![CI](https://github.com/rocketboosters/pipper/actions/workflows/ci.yml/badge.svg)](https://github.com/rocketboosters/pipper/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/rocketboosters/pipper/branch/main/graph/badge.svg)](https://codecov.io/gh/rocketboosters/pipper)
+[![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 [![Code style: mypy](https://img.shields.io/badge/code%20style-mypy-white)](http://mypy-lang.org/)
 [![PyPI - License](https://img.shields.io/pypi/l/pipper)](https://pypi.org/project/pipper/)
 
 __Private Python package manager on an S3 bucket__
 
-A Python package manager wrapped around pip and poetry for lightweight
+A Python package manager wrapped around pip for lightweight
 management of non-public packages with an AWS S3 static backend. Requires no
 server or database resources, only a private S3 bucket that stores the pipper
 packages. Authentication is handled using standard AWS Identity and Access
@@ -23,13 +22,13 @@ The pipper package can be installed using pip:
 
     $ pip install pipper
 
-or with poetry:
+or with uv:
 
-    $ poetry add pipper --dev
+    $ uv pip install pipper
 
 ## Basic Usage
 
-Pipper is primarily used from the command line and consists of multiple 
+Pipper is primarily used from the command line and consists of multiple
 sub-command actions. The general format of a pipper command is:
 
     $ pipper <ACTION> <REQUIRED_ARGS> --flag=<VALUE> --other-flag ...
@@ -44,10 +43,10 @@ The available actions are:
  * [authorize](#authorize-action): create a pre-authorized url for download
  * [repository](#repository-action): Modify pre-defined pipper repositories
 
-    
+
 ## AWS Credentials
 
-Pipper uses AWS credentials for authentication. To maximize flexibility, the 
+Pipper uses AWS credentials for authentication. To maximize flexibility, the
 AWS credentials can be specified in a myriad of ways. Pipper will try to
 identify credentials in the following order:
 
@@ -56,7 +55,7 @@ the command line with the `--credentials` flag:
 
 * `-c --credentials <AWS_ACCESS_KEY_ID> <AWS_SECRET> <AWS_SESSION_TOKEN>`
 
-This can be useful for situations where profiles are not initialized or 
+This can be useful for situations where profiles are not initialized or
 undesirable. If your credentials do not require a session token, which is
 usually the case, that argument can be omitted. It's also possible to specify
 a missing token using a `0` value for the `<AWS_SESSION_TOKEN>` argument for
@@ -67,7 +66,7 @@ it with an explicit ignore value.
 __2. Pipper Configuration:__ Using pipper's _repository_ command action, you can store
 credentials and remote information in a pipper config file. If you do create a pipper
 repository configuration, which stores AWS credentials, you can reference
-that repository configuration by name to provide credentials to the 
+that repository configuration by name to provide credentials to the
 various commands with the `--repository` command flag:
 
 * `-r --repository <PIPPER_REPOSITORY_NAME>`
@@ -76,27 +75,27 @@ For more information on how to specify repository configurations for use with
 this flag, see the [repository](#repository-action). This is the recommended
 way to specify credentials for persistent environments like your local computer.
 
-__3. AWS Profiles:__ Standard AWS profile-based credentials can be used as 
+__3. AWS Profiles:__ Standard AWS profile-based credentials can be used as
 well. Use the `--profile` flag to specify the name of the profile you wish
 to use:
 
 * `-p --profile <AWS_PROFILE_NAME>`
- 
-__4. Pipper Environmental Variables:__ If none of the previous forms of 
-credentials are provided, pipper will try to use pipper-specific environmental 
+
+__4. Pipper Environmental Variables:__ If none of the previous forms of
+credentials are provided, pipper will try to use pipper-specific environmental
 variables:
 
 `PIPPER_AWS_ACCESS_KEY_ID`
-     
-`PIPPER_AWS_SECRET_ACCESS_KEY`  
+
+`PIPPER_AWS_SECRET_ACCESS_KEY`
 
 `PIPPER_AWS_SESSION_TOKEN`
 
 __5. AWS Environmental Variables:__ If none of the previous forms of credentials
-are provided, pipper will attempt to use the standard AWS environmental 
+are provided, pipper will attempt to use the standard AWS environmental
 variables:
 
-`AWS_ACCESS_KEY_ID` 
+`AWS_ACCESS_KEY_ID`
 
 `AWS_SECRET_ACCESS_KEY`
 
@@ -105,14 +104,14 @@ variables:
 If neither set of environmental variables exist, pipper
 will fallback to using the _default_ profile credentials if they exist.
 
-__6. Default Pipper Repository Configuration:__ If none of the other 
+__6. Default Pipper Repository Configuration:__ If none of the other
 credentials are specified, pipper will try to use the default repository
 configuration if one exists.
 
-__7. System-level credentials:__ In the end, pipper will try to use the 
+__7. System-level credentials:__ In the end, pipper will try to use the
 default system-level credentials, which is useful in situations like EC2
 instances where the credentials are baked into the instance. However, on
-remote systems the lack of specified credentials will likely result in 
+remote systems the lack of specified credentials will likely result in
 authorization exceptions.
 
 
@@ -137,7 +136,7 @@ functions:
     Allows you to load one or more packages from a pipper-formatted
     JSON file. Use this in place of specifying the packages directly
     in the command when convenient.
-    
+
 * `-u --upgrade`
 
     When specified currently installed packages will be updated to the latest
@@ -145,7 +144,7 @@ functions:
     ignore already installed packages, even if a newer version is available.
 
 When installing pipper packages, pipper dependencies are handled recursively as
-long as the dependency packages have a properly configured pipper.json file
+long as the dependency packages have a properly configured pipper.(json|yaml) file
 located at the top-level of the repository.
 
 ### Installation Examples
@@ -182,15 +181,15 @@ AWS credentials are unavailable.
 * `-e --extract`
 
     When specified, the downloaded pipper files will be immediately extracted
-    into their consituent wheel and metadata files. Useful if you want to 
+    into their consituent wheel and metadata files. Useful if you want to
     install directly with pip using advanced options such as installing to
     a specific directly.
 
 
 ## Repository Action
 
-The repository action allows you to create and managed named repositories, 
-which can be used to simplify the management of credentials within the 
+The repository action allows you to create and managed named repositories,
+which can be used to simplify the management of credentials within the
 command line. The repository command action has a number of sub-actions:
 
 
@@ -198,7 +197,7 @@ command line. The repository command action has a number of sub-actions:
 
     $ pipper repository add <REPOSITORY_NAME>
 
-Adds a new repository configuration with the specified name. Use the 
+Adds a new repository configuration with the specified name. Use the
 `-p --profile` or `-c --credentials` flag to specify the AWS credentials to
 be used by this repository. The _add_ sub-action has other flags:
 
@@ -227,7 +226,7 @@ values.
 ### Repository: remove
 
     $ pipper repository remove <EXISTING_REPOSITORY_NAME>
-    
+
 Removes an existing repository configuration from the configuration storage.
 
 
@@ -243,7 +242,7 @@ also lets you know which of the configurations is set to the default value.
 
     $ pipper repository exists
 
-Displays information on whether or not a repository configuration currently 
+Displays information on whether or not a repository configuration currently
 exists.
 
 
@@ -254,7 +253,7 @@ around those you can create pre-authorized URLs for downloading and installing
 packages that can be used where credentials are not available.
 
     $ pipper authorize <PACKAGE_NAME[:VERSION]> ...
-    
+
 * `-b --bucket <BUCKET_NAME>`
 
     Name of the S3 bucket where the remote pipper files are stored.
@@ -275,7 +274,7 @@ packages that can be used where credentials are not available.
     How long the authorized URL is valid before it expires. The format
     should be `<NUMBER><UNIT>`, where the number is a positive integer and
     the unit can be hours, minutes or seconds. Units can be abbreviated, e.g.:
-    
+
     * _12mins_: 12 minutes
     * _130m_: 130 minutes
     * _18s_: 18 seconds
@@ -284,7 +283,7 @@ packages that can be used where credentials are not available.
 
 ## Info Action
 
-Prints information on the locally installed and remote versions of the 
+Prints information on the locally installed and remote versions of the
 specified package. Also, informs you if there is a newer version of the package
 available for upgrade.
 
@@ -309,31 +308,31 @@ Creates a pipper package distribution file that can be installed directly or
 published to a remote S3 bucket for distribution.
 
     $ pipper bundle <PACKAGE_DIRECTORY>
-    
+
 * `-o --output <OUTPUT_DIRECTORY>`
 
-    The directory where the pipper bundle should be saved. Defaults to the 
+    The directory where the pipper bundle should be saved. Defaults to the
     current working directory.
-    
-    
+
+
 ## Publish Action
 
 Deploys a pipper bundle file to a remote S3 bucket for distribution.
 
     $ pipper publish <PIPPER_FILENAME>
-    
+
 If you specify a directory instead of a filename, pipper will search for a
 pipper file in that directory and upload it. If multiple pipper files are
 found, the most recently created one will be uploaded.
-    
+
     $ pipper publish <DIRECTORY_CONTAINING_PIPPER_FILE>
 
 * `-b --bucket <BUCKET_NAME>`
-    
+
     Name of the S3 bucket where the package will be published.
 
 * `-f --force`
-    
+
     Unless this flag is specified, publishing a package will be skipped if an
     identical version of the package has already been published.
 

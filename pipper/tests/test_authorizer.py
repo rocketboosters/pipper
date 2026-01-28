@@ -1,6 +1,5 @@
 import pytest
 
-
 scenarios = [
     ("72s", 72),
     ("85sec", 85),

@@ -1,13 +1,11 @@
 import os
 import subprocess
 import sys
-import typing
 
 import pkg_resources
 
 from pipper import versioning
 from pipper.environment import Environment
-from typing import Optional
 
 
 def update_required(env: Environment, package_name: str, install_version: str) -> bool:
@@ -55,7 +53,7 @@ def status(env: Environment, package_name: str):
 def install_wheel(
     wheel_path: str,
     to_user: bool = False,
-    target_directory: Optional[str] = None,
+    target_directory: str | None = None,
     dry_run: bool = False,
     use_pip_legacy_resolver: bool = False,
 ):
@@ -74,9 +72,7 @@ def install_wheel(
         cmd.append("--use-deprecated=legacy-resolver")
 
     cmd += ["--user"] if to_user else []
-    cmd += (
-        ["--target={}".format(clean_path(target_directory))] if target_directory else []
-    )
+    cmd += [f"--target={clean_path(target_directory)}"] if target_directory else []
     print("[COMMAND]:\n", " ".join(cmd).replace(" --", "\n  --"))
 
     if dry_run:
@@ -89,7 +85,7 @@ def install_wheel(
 def install_pypi(
     package_name: str,
     to_user: bool = False,
-    target_directory: Optional[str] = None,
+    target_directory: str | None = None,
     dry_run: bool = False,
     use_pip_legacy_resolver: bool = False,
 ):
@@ -107,9 +103,7 @@ def install_pypi(
         cmd.append("--use-deprecated=legacy-resolver")
 
     cmd += ["--user"] if to_user else []
-    cmd += (
-        ["--target={}".format(clean_path(target_directory))] if target_directory else []
-    )
+    cmd += [f"--target={clean_path(target_directory)}"] if target_directory else []
     print("[COMMAND]:\n", " ".join(cmd).replace(" --", "\n  --"))
 
     if dry_run:
@@ -120,9 +114,9 @@ def install_pypi(
 
 
 def install_conda(
-    package: typing.Union[str, dict],
+    package: str | dict,
     to_user: bool = False,
-    target_directory: Optional[str] = None,
+    target_directory: str | None = None,
     dry_run: bool = False,
 ):
     """
@@ -144,9 +138,7 @@ def install_conda(
     ]
     cmd += ["--channel", channel] if channel else []
     cmd += ["--user"] if to_user else []
-    cmd += (
-        ["--prefix={}".format(clean_path(target_directory))] if target_directory else []
-    )
+    cmd += [f"--prefix={clean_path(target_directory)}"] if target_directory else []
     print("[COMMAND]:\n", " ".join(cmd).replace(" --", "\n  --"))
 
     if dry_run:

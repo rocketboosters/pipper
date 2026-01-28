@@ -17,12 +17,12 @@ def get_package_metadata(env: Environment, package_name: str, package_version: s
             root_prefix=env.root_prefix,
         ),
     )
-    return {key: value for key, value in response["Metadata"].items()}
+    return {**response["Metadata"]}
 
 
 def print_local_only(env: Environment, package_name: str):
     """ """
-    print("[PACKAGE]: {}".format(package_name))
+    print(f"[PACKAGE]: {package_name}")
 
     local_data = wrapper.status(env, package_name)
     if local_data is None:
@@ -39,7 +39,7 @@ def print_with_remote(env: Environment, package_name: str):
     try:
         latest = get_package_metadata(env, package_name, remote_versions[-1].version)
     except IndexError:
-        latest = dict(version="None", timestamp="Never")
+        latest = {"version": "None", "timestamp": "Never"}
 
     local_data = wrapper.status(env, package_name)
     comparison = (

@@ -1,5 +1,6 @@
-from pipper import versioning
 import pytest
+
+from pipper import versioning
 
 comparisons = [
     ("0.0.1", "0.0.1", 0),
@@ -14,11 +15,7 @@ comparisons = [
 def test_compare_constraint(version, constraint, expected):
     """Should correctly compare between two versions"""
     result = versioning.compare_constraint(version, constraint)
-    assert (
-        expected == result
-    ), """
+    assert expected == result, f"""
         Expect comparison of "{version}" with "{constraint}" to produce
         a {expected} result instead of a {result} result.
-        """.format(
-        version=version, constraint=constraint, expected=expected, result=result
-    )
+        """

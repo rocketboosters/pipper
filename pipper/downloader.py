@@ -10,7 +10,6 @@ from pipper import environment
 from pipper import versioning
 from pipper import wrapper
 from pipper.environment import Environment
-from typing import Optional
 
 
 def parse_package_id(
@@ -48,14 +47,14 @@ def parse_package_id(
     """
     if package_id.startswith("https://"):
         r = versioning.parse_package_url(package_id)
-        return dict(
-            url=r.url,
-            bucket=r.bucket,
-            name=r.package_name,
-            safe_version=r.safe_version,
-            version=r.version,
-            key=r.key,
-        )
+        return {
+            "url": r.url,
+            "bucket": r.bucket,
+            "name": r.package_name,
+            "safe_version": r.safe_version,
+            "version": r.version,
+            "key": r.key,
+        }
 
     package_parts = package_id.split(":")
     name = package_parts[0]
@@ -75,19 +74,19 @@ def parse_package_id(
         ).version
 
     try:
-        version = next((v for v in possible_versions() if v is not None))
+        version = next(v for v in possible_versions() if v is not None)
     except IndexError:
-        print('[ERROR]: Unable to acquire version of "{}"'.format(package_id))
+        print(f'[ERROR]: Unable to acquire version of "{package_id}"')
         raise
 
     print("[PACKAGE]:", package_id, version)
 
-    return dict(
-        name=name,
-        version=version,
-        bucket=env.bucket,
-        key=versioning.make_s3_key(name, version, env.root_prefix),
-    )
+    return {
+        "name": name,
+        "version": version,
+        "bucket": env.bucket,
+        "key": versioning.make_s3_key(name, version, env.root_prefix),
+    }
 
 
 def save(url: str, local_path: str) -> str:
@@ -95,10 +94,8 @@ def save(url: str, local_path: str) -> str:
     with closing(requests.get(url, stream=True)) as response:
         if response.status_code != 200:
             print(
-                (
-                    "[ERROR]: Unable to download remote package. Has your"
-                    "authorized URL expired? Is there internet connectivity?"
-                )
+                "[ERROR]: Unable to download remote package. Has your"
+                "authorized URL expired? Is there internet connectivity?"
             )
 
         with open(local_path, "wb") as f:
@@ -111,7 +108,7 @@ def save(url: str, local_path: str) -> str:
 
 
 def extract_pipper_file(
-    local_bundle_path: str, extract_directory: Optional[str] = None
+    local_bundle_path: str, extract_directory: str | None = None
 ) -> dict:
     """ """
 
@@ -133,12 +130,12 @@ def extract_pipper_file(
         zipper.extract("package.whl", directory)
         shutil.move(os.path.join(directory, "package.whl"), wheel_path)
 
-    return dict(
-        meta_path=metadata_path,
-        wheel_path=wheel_path,
-        metadata=metadata,
-        bundle_path=local_bundle_path,
-    )
+    return {
+        "meta_path": metadata_path,
+        "wheel_path": wheel_path,
+        "metadata": metadata,
+        "bundle_path": local_bundle_path,
+    }
 
 
 def download_package(env: Environment, package_id: str) -> str:
@@ -171,7 +168,7 @@ def download_many(env: Environment, package_ids: list) -> dict:
     return {pid: download_package(env, pid) for pid in package_ids}
 
 
-def download_from_configs(env: Environment, configs_path: Optional[str] = None) -> dict:
+def download_from_configs(env: Environment, configs_path: str | None = None) -> dict:
     """..."""
     configs = environment.load_configs(configs_path)
     prefix = "dev_" if env.args.get("dev") else ""

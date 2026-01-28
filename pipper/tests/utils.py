@@ -1,8 +1,7 @@
-import typing
 import functools
+import typing
 from unittest.mock import MagicMock
 from unittest.mock import patch
-from typing import Optional
 
 
 class BotoMocks(typing.NamedTuple):
@@ -35,14 +34,17 @@ class PatchSession:
 
 
 def make_list_objects_response(
-    contents: Optional[list] = None, next_continuation_token: Optional[str] = None
+    contents: list | None = None, next_continuation_token: str | None = None
 ) -> dict:
     """..."""
-    return dict(Contents=contents or [], NextContinuationToken=next_continuation_token)
+    return {
+        "Contents": contents or [],
+        "NextContinuationToken": next_continuation_token,
+    }
 
 
 def _get_client(
-    mocked_clients: typing.Dict[str, MagicMock], identifier: str, **kwargs
+    mocked_clients: dict[str, MagicMock], identifier: str, **kwargs
 ) -> MagicMock:
     """..."""
     return mocked_clients.get(identifier) or MagicMock()

@@ -1,4 +1,3 @@
-import typing
 from urllib.parse import urlparse
 
 from pipper import s3  # noqa
@@ -9,7 +8,6 @@ from pipper.versioning.serde import deserialize_prefix  # noqa
 from pipper.versioning.serde import explode  # noqa
 from pipper.versioning.serde import serialize  # noqa
 from pipper.versioning.serde import serialize_prefix  # noqa
-from typing import Optional
 
 
 def to_remote_version(
@@ -56,16 +54,16 @@ def make_s3_key(
         if not package_version.startswith("v")
         else package_version
     )
-    return "{}/{}/{}.pipper".format(root_prefix, package_name, safe_version)
+    return f"{root_prefix}/{package_name}/{safe_version}.pipper"
 
 
 def list_versions(
     environment: Environment,
     package_name: str,
-    version_prefix: Optional[str] = None,
+    version_prefix: str | None = None,
     include_prereleases: bool = False,
     reverse: bool = False,
-) -> typing.List[RemoteVersion]:
+) -> list[RemoteVersion]:
     """
     Lists the available versions of the specified package by querying the
     remote S3 storage and returns those as keys. The results are sorted in
@@ -90,13 +88,9 @@ def list_versions(
         Whether or not to include pre-release versions in the results.
     """
     prefix = serialize_prefix(version_prefix or "").split("*")[0]
-    key_prefix = "{}/{}/v{}".format(
-        environment.root_prefix,
-        package_name,
-        prefix,
-    )
+    key_prefix = f"{environment.root_prefix}/{package_name}/v{prefix}"
 
-    responses: typing.List[dict] = []
+    responses: list[dict] = []
     while not responses or responses[-1].get("NextContinuationToken"):
         continuation_kwargs = (
             {"ContinuationToken": responses[-1].get("NextContinuationToken")}
@@ -108,7 +102,7 @@ def list_versions(
                 s3_client=environment.s3_client,
                 bucket=environment.bucket,
                 prefix=key_prefix,
-                **continuation_kwargs
+                **continuation_kwargs,
             )
         )
 
@@ -160,7 +154,9 @@ def compare_constraint(version: str, constraint: str) -> int:
         items = sorted([a, b])
         return -1 if items.index(a) == 0 else 1
 
-    comparisons = (compare_part(v, c) for v, c in zip(version_parts, constraint_parts))
+    comparisons = (
+        compare_part(v, c) for v, c in zip(version_parts, constraint_parts, strict=True)
+    )
 
     return next((c for c in comparisons if c != 0), 0)
 
@@ -168,9 +164,9 @@ def compare_constraint(version: str, constraint: str) -> int:
 def find_latest_match(
     environment: Environment,
     package_name: str,
-    version_constraint: Optional[str] = None,
+    version_constraint: str | None = None,
     include_prereleases: bool = False,
-) -> typing.Union[RemoteVersion, None]:
+) -> RemoteVersion | None:
     """
     Searches through available remote versions of the specified package and
     returns the highest version that satisfies the specified version
@@ -200,7 +196,7 @@ def find_latest_match(
     )
 
     if not available:
-        raise ValueError('No pipper package "{}" was found.'.format(package_name))
+        raise ValueError(f'No pipper package "{package_name}" was found.')
 
     if not version_constraint:
         return available[0]

@@ -1,7 +1,6 @@
 import json
 import os
 import re
-import typing
 from datetime import timedelta
 from urllib.parse import urlparse
 
@@ -12,7 +11,7 @@ from pipper.environment import Environment
 DELTA_REGEX = re.compile(r"(?P<number>[0-9]+)\s*(?P<unit>[a-zA-Z]+)")
 
 
-def to_time_delta(age: typing.Optional[str]) -> timedelta:
+def to_time_delta(age: str | None) -> timedelta:
     """
     Converts an age string into a timedelta object, parsing the number and
     units of the age. Valid units are:
@@ -49,12 +48,12 @@ def parse_url(pipper_url: str) -> dict:
     url_data = urlparse(pipper_url)
     path_parts = url_data.path.strip("/").split("/")
 
-    return dict(
-        url=pipper_url,
-        wheel_filename=path_parts[-1],
-        version=path_parts[-2].replace("-", "."),
-        package_name=path_parts[-3],
-    )
+    return {
+        "url": pipper_url,
+        "wheel_filename": path_parts[-1],
+        "version": path_parts[-2].replace("-", "."),
+        "package_name": path_parts[-3],
+    }
 
 
 def create_url(env: Environment, package_id: str) -> str:
@@ -83,14 +82,14 @@ def create_many_urls(env: Environment, package_ids: list) -> dict:
     if not save_path:
         return urls
 
-    configs = dict(dependencies=[url for url in urls.values()])
+    configs = {"dependencies": list(urls.values())}
 
     path = os.path.realpath(save_path)
     with open(path, "w") as f:
         json.dump(configs, f)
 
     if not env.quiet:
-        print("[SAVED]: {}".format(path))
+        print(f"[SAVED]: {path}")
 
     return urls
 

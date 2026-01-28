@@ -14,26 +14,18 @@ TEST_PARAMETERS = [
 def test_serialize(source: str, expected: str):
     """Should serialize the source version to the expected value"""
     result = versioning.serialize(source)
-    assert (
-        result == expected
-    ), """
-        Expected "{}" to be serialized as "{}" and not "{}".
-        """.format(
-        source, expected, result
-    )
+    assert result == expected, f"""
+        Expected "{source}" to be serialized as "{expected}" and not "{result}".
+        """
 
 
 @pytest.mark.parametrize("expected,source", TEST_PARAMETERS)
 def test_deserialize(source: str, expected: str):
     """Should deserialize the source version to the expected value"""
     result = versioning.deserialize(source)
-    assert (
-        result == expected
-    ), """
-        Expected "{}" to be deserialized as "{}" and not "{}".
-        """.format(
-        source, expected, result
-    )
+    assert result == expected, f"""
+        Expected "{source}" to be deserialized as "{expected}" and not "{result}".
+        """
 
 
 def test_serialize_invalid():

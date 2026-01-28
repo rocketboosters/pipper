@@ -1,5 +1,3 @@
-import typing
-
 import semver
 
 
@@ -13,7 +11,7 @@ def explode(version_prefix: str) -> tuple:
         A semantic version or part of a semantic version, which can include
         wildcard characters.
     """
-    sections: typing.List[str] = []
+    sections: list[str] = []
     remainder = version_prefix.rstrip(".")
     for separator in ("+", "-"):
         parts = remainder.split(separator, 1)
@@ -36,8 +34,8 @@ def serialize(version: str) -> str:
     """
     try:
         semver.VersionInfo.parse(version)
-    except ValueError:
-        raise ValueError('Invalid semantic version "{}"'.format(version))
+    except ValueError as error:
+        raise ValueError(f'Invalid semantic version "{version}"') from error
 
     return serialize_prefix(version)
 
@@ -57,11 +55,11 @@ def serialize_prefix(version_prefix: str) -> str:
     sections = [part.replace(".", "_") for part in explode(version_prefix)]
     prefix = "-".join([section for section in sections[:3] if section])
     if sections[3]:
-        prefix += "__pre_{}".format(sections[3])
+        prefix += f"__pre_{sections[3]}"
     if sections[4]:
-        prefix += "__build_{}".format(sections[4])
+        prefix += f"__build_{sections[4]}"
 
-    return "v{}".format(prefix) if prefix else ""
+    return f"v{prefix}" if prefix else ""
 
 
 def deserialize_prefix(safe_version_prefix: str) -> str:
@@ -83,7 +81,7 @@ def deserialize_prefix(safe_version_prefix: str) -> str:
         ("-", "rsplit"),
     ]
 
-    sections: typing.List[str] = []
+    sections: list[str] = []
     remainder = safe_version_prefix.strip("v").rstrip("_")
     for separator, operator in searches:
         parts = getattr(remainder, operator)(separator, 1)
@@ -94,9 +92,9 @@ def deserialize_prefix(safe_version_prefix: str) -> str:
 
     prefix = ".".join([section for section in sections[:3] if section])
     if sections[3]:
-        prefix += "-{}".format(sections[3])
+        prefix += f"-{sections[3]}"
     if sections[4]:
-        prefix += "+{}".format(sections[4])
+        prefix += f"+{sections[4]}"
 
     return prefix
 
@@ -111,7 +109,7 @@ def deserialize(safe_version: str) -> str:
 
     try:
         semver.VersionInfo.parse(result)
-    except ValueError:
-        raise ValueError('Invalid semantic version "{}"'.format(result))
+    except ValueError as error:
+        raise ValueError(f'Invalid semantic version "{result}"') from error
 
     return result

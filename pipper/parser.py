@@ -1,7 +1,6 @@
 import argparse
 import os
 from argparse import ArgumentParser
-from typing import Optional
 
 package_directory = os.path.dirname(os.path.realpath(__file__))
 
@@ -20,9 +19,7 @@ def required_length(minimum: int, maximum: int, optional: bool = False):
                 return
 
             raise argparse.ArgumentTypeError(
-                'Argument "{}" must have {}-{} arguments'.format(
-                    self.dest, minimum, maximum
-                )
+                f'Argument "{self.dest}" must have {minimum}-{maximum} arguments'
             )
 
     return RequiredLength
@@ -31,7 +28,7 @@ def required_length(minimum: int, maximum: int, optional: bool = False):
 def read_file(*args) -> str:
     """ """
     path = os.path.join(package_directory, *args)
-    with open(path, "r") as f:
+    with open(path) as f:
         return f.read()
 
 
@@ -100,11 +97,14 @@ def populate_install(parser: ArgumentParser) -> ArgumentParser:
     parser.add_argument("--user", default=False, action="store_true", dest="pip_user")
     parser.add_argument(
         "--dev",
+        "--devel",
+        "--development",
+        dest="dev",
         action="store_true",
         help="""
             Only significant when combined with the `--input` flag, this will instruct
             pipper to install from "dev_dependencies" instead of "dependencies" within
-            the pipper.json source file.
+            the pipper(.json|.yaml) source file.
             """,
     )
     parser.add_argument(
@@ -255,11 +255,14 @@ def populate_download(parser: ArgumentParser) -> ArgumentParser:
     parser.add_argument("-i", "--input", dest="configs_path")
     parser.add_argument(
         "--dev",
+        "--devel",
+        "--development",
+        dest="dev",
         action="store_true",
         help="""
             Only significant when combined with the `--input` flag, this will instruct
             pipper to download from "dev_dependencies" instead of "dependencies" within
-            the pipper.json source file.
+            the pipper.(json|yaml) source file.
             """,
     )
     parser.add_argument(
@@ -313,11 +316,14 @@ def populate_authorize(parser: ArgumentParser) -> ArgumentParser:
     parser.add_argument("-i", "--input", dest="configs_path")
     parser.add_argument(
         "--dev",
+        "--devel",
+        "--development",
+        dest="dev",
         action="store_true",
         help="""
             Only significant when combined with the `--input` flag, this will instruct
             pipper to authorize from "dev_dependencies" instead of "dependencies" within
-            the pipper.json source file.
+            the pipper.(json|yaml) source file.
             """,
     )
     parser.add_argument("-e", "--expires", dest="expires_in", default=10)
@@ -334,7 +340,7 @@ def populate_authorize(parser: ArgumentParser) -> ArgumentParser:
     return populate_with_credentials(parser)
 
 
-def parse(cli_args: Optional[list] = None) -> dict:
+def parse(cli_args: list | None = None) -> dict:
     """
     Parses command line arguments for consumption by the invoked action
     and returns the parsed arguments as a dictionary.

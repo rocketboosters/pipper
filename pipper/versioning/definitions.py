@@ -1,10 +1,9 @@
 import semver
 
 from pipper.versioning import serde
-from typing import Optional
 
 
-class RemoteVersion(object):
+class RemoteVersion:
     """
     Data structure for storing information about remote data sources.
     """
@@ -13,7 +12,7 @@ class RemoteVersion(object):
         self,
         bucket: str,
         key: str,
-        url: Optional[str] = None,
+        url: str | None = None,
     ):
         """_ doc..."""
         self._key = key
@@ -64,7 +63,7 @@ class RemoteVersion(object):
                 self.bucket,
                 self.root_prefix,
                 self.package_name,
-                "{}.pipper".format(self.safe_version),
+                f"{self.safe_version}.pipper",
             ]
         )
         return self._url or standard_url
@@ -89,6 +88,4 @@ class RemoteVersion(object):
         return semver.VersionInfo.parse(self.version).compare(other.version) == 0
 
     def __repr__(self):
-        return "<{} {}:{}>".format(
-            self.__class__.__name__, self.package_name, self.version
-        )
+        return f"<{self.__class__.__name__} {self.package_name}:{self.version}>"

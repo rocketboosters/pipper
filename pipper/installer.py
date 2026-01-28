@@ -1,20 +1,18 @@
 import os
 import shutil
 import tempfile
-import typing
 
 from pipper import downloader
 from pipper import environment
 from pipper import s3
 from pipper import wrapper
 from pipper.environment import Environment
-from typing import Optional
 
 
 def install_pipper_file(
     local_source_path: str,
     to_user: bool = False,
-    target_directory: Optional[str] = None,
+    target_directory: str | None = None,
     dry_run: bool = False,
     use_pip_legacy_resolver: bool = False,
 ) -> dict:
@@ -54,7 +52,7 @@ def install_pipper_file(
         shutil.rmtree(directory)
 
 
-def install_dependencies(env: Environment, dependencies: typing.List[str]):
+def install_dependencies(env: Environment, dependencies: list[str]):
     """
 
     :param env:
@@ -152,7 +150,7 @@ def install(env: Environment, package_id: str):
     install_dependencies(env, dependencies)
 
 
-def install_many(env: Environment, package_ids: typing.List[str]):
+def install_many(env: Environment, package_ids: list[str]):
     """
     Installs a list of package identifiers, which can be either package names
     or package name and version combinations.
@@ -167,11 +165,11 @@ def install_many(env: Environment, package_ids: typing.List[str]):
         install(env, package_id)
 
 
-def install_from_configs(env: Environment, configs_path: Optional[str] = None):
+def install_from_configs(env: Environment, configs_path: str | None = None):
     """
     Installs pipper dependencies specified in a pipper configs file. If the
     path to the configs file is not specified, the default path will be used
-    instead. The default location is a pipper.json file in the current
+    instead. The default location is a pipper.(json|yaml) file in the current
     working directory.
 
     :param env:
@@ -186,7 +184,7 @@ def install_from_configs(env: Environment, configs_path: Optional[str] = None):
     configs = environment.load_configs(configs_path)
 
     for package in configs.get("pypi", []):
-        print("\n=== PYPI {} ===".format(package))
+        print(f"\n=== PYPI {package} ===")
         wrapper.install_pypi(
             package_name=package,
             to_user=to_user or False,
@@ -196,7 +194,7 @@ def install_from_configs(env: Environment, configs_path: Optional[str] = None):
         )
 
     for package in configs.get("conda", []):
-        print("\n=== CONDA {} ===".format(package))
+        print(f"\n=== CONDA {package} ===")
         wrapper.install_conda(
             package=package,
             to_user=to_user or False,
@@ -214,7 +212,7 @@ def run(env: Environment):
     conditions. If a packages argument is specified and contains one or more
     package IDs, they will be installed. If a path to a JSON pipper configs
     file is specified, that will be installed instead. If nothing has been
-    specified, pipper will look for a pipper.json configs file in the current
+    specified, pipper will look for a pipper.(json|yaml) configs file in the current
     directory and use that for installation.
 
     :param env:

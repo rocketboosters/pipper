@@ -78,19 +78,19 @@ def create_meta(
     config_path = os.path.join(package_directory, "pipper.json")
 
     try:
-        with open(config_path, "r") as f:
+        with open(config_path) as f:
             metadata: dict = json.load(f)
     except FileNotFoundError:
         metadata = {}
 
     metadata.update(
-        dict(
-            name=distribution_data["package_name"],
-            wheel_name=distribution_data["wheel_name"],
-            version=distribution_data["version"],
-            safe_version=distribution_data["safe_version"],
-            timestamp=datetime.utcnow().isoformat(),
-        )
+        {
+            "name": distribution_data["package_name"],
+            "wheel_name": distribution_data["wheel_name"],
+            "version": distribution_data["version"],
+            "safe_version": distribution_data["safe_version"],
+            "timestamp": datetime.utcnow().isoformat(),
+        }
     )
 
     path = os.path.join(bundle_directory, "package.meta")
@@ -126,13 +126,13 @@ def _create_setup_py_wheel(setup_path: str, bundle_directory: str) -> dict:
     shutil.move(os.path.join(bundle_directory, wheel_filename), wheel_path)
 
     metadata = result.metadata
-    return dict(
-        wheel_path=wheel_path,
-        wheel_name=wheel_filename,
-        package_name=metadata.get_name(),
-        version=metadata.get_version(),
-        safe_version=versioning.serialize(metadata.get_version()),
-    )
+    return {
+        "wheel_path": wheel_path,
+        "wheel_name": wheel_filename,
+        "package_name": metadata.get_name(),
+        "version": metadata.get_version(),
+        "safe_version": versioning.serialize(metadata.get_version()),
+    }
 
 
 def _create_poetry_wheel(package_directory: str, bundle_directory: str) -> dict:
@@ -176,13 +176,56 @@ def _create_poetry_wheel(package_directory: str, bundle_directory: str) -> dict:
     except KeyError:
         name = configs["project"]["name"]
 
-    return dict(
-        wheel_path=wheel_path,
-        wheel_name=wheel_filename,
-        package_name=name,
-        version=version,
-        safe_version=versioning.serialize(version),
-    )
+    return {
+        "wheel_path": wheel_path,
+        "wheel_name": wheel_filename,
+        "package_name": name,
+        "version": version,
+        "safe_version": versioning.serialize(version),
+    }
+
+
+def _create_uv_wheel(package_directory: str, bundle_directory: str) -> dict:
+    """
+    Creates a wheel for a uv-based package definition.
+
+    :param package_directory:
+        Absolute path to directory in which the uv package is defined.
+    :param bundle_directory:
+        Directory where bundling into a wheel should be carried out.
+    """
+    directory = pathlib.Path(package_directory).absolute()
+    dist_directory = directory.joinpath("dist")
+
+    starting_directory = pathlib.Path(".").absolute()
+    os.chdir(package_directory)
+    command = ["uv", "build", "--wheel"]
+
+    result = subprocess.run(command)
+    os.chdir(starting_directory)
+    result.check_returncode()
+
+    # Pause to make sure OS releases wheel file before moving it
+    time.sleep(1)
+
+    wheel_files = [
+        name for name in os.listdir(str(dist_directory)) if name.endswith(".whl")
+    ]
+    wheel_filename = wheel_files[0]
+    wheel_path = os.path.join(bundle_directory, "package.whl")
+    shutil.move(str(dist_directory.joinpath(wheel_filename)), wheel_path)
+
+    configs = toml.loads(directory.joinpath("pyproject.toml").read_text())
+    version = configs["project"]["version"]
+    name = configs["project"]["name"]
+
+    return {
+        "wheel_path": wheel_path,
+        "wheel_name": wheel_filename,
+        "package_name": name,
+        "version": version,
+        "safe_version": versioning.serialize(version),
+    }
 
 
 def create_wheel(package_directory: str, bundle_directory: str) -> dict:
@@ -210,12 +253,18 @@ def create_wheel(package_directory: str, bundle_directory: str) -> dict:
 
     pyproject_path = directory.joinpath("pyproject.toml")
     if pyproject_path.exists():
-        # Assumes that a pyproject.toml without at least a shim setup.py means
-        # that poetry is the build system.
-        return _create_poetry_wheel(package_directory, bundle_directory)
+        # Check the build backend to determine which builder to use
+        configs = toml.loads(pyproject_path.read_text())
+        build_backend = configs.get("build-system", {}).get("build-backend", "")
+
+        if "poetry" in build_backend:
+            return _create_poetry_wheel(package_directory, bundle_directory)
+        else:
+            # Use uv for other PEP 517 backends (hatchling, flit, setuptools, etc.)
+            return _create_uv_wheel(package_directory, bundle_directory)
 
     raise FileNotFoundError(
-        'No package configuration file found in "{}"'.format(package_directory)
+        f'No package configuration file found in "{package_directory}"'
     )
 
 
@@ -233,7 +282,7 @@ def run(env: Environment):
 
     directory = os.path.realpath(package_directory)
     if not os.path.exists(directory):
-        raise NotADirectoryError('No such directory "{}"'.format(directory))
+        raise NotADirectoryError(f'No such directory "{directory}"')
 
     save_directory = (
         os.path.realpath(output_directory) if output_directory else directory

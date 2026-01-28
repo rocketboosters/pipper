@@ -12,9 +12,7 @@ def test_make_s3_key():
     assert key.find(f"/{name}/"), "Expected the package name as a folder."
     assert name == remote.package_name
     assert version == remote.version
-    assert key.endswith(
-        "{}.pipper".format(remote.safe_version)
-    ), """
+    assert key.endswith(f"{remote.safe_version}.pipper"), """
         Expected the key to end with the safe version as the file name.
         """
 
@@ -26,10 +24,10 @@ def test_to_remote_version():
     bucket = "FAKE"
     remote = versioning.to_remote_version(name, version, bucket)
     assert version == remote.version
-    assert "v1-2-3" == remote.safe_version
+    assert remote.safe_version == "v1-2-3"
     assert name == remote.package_name
     assert f"pipper/{name}/v1-2-3.pipper" == remote.key
-    assert "v1-2-3.pipper" == remote.filename
+    assert remote.filename == "v1-2-3.pipper"
     assert remote == remote, "Should be equal to itself when compared"
 
 
@@ -45,9 +43,7 @@ def test_remote_sorting():
     ]
     result = sorted(remotes)
     comparison = sorted(remotes, key=lambda r: r.package_name)
-    assert (
-        comparison == result
-    ), """
+    assert comparison == result, """
         Expected the RemoteVersions to be sorted by version such that their
         package names are sorted alphabetically.
         """

@@ -24,5 +24,5 @@ def test_comparison():
     assert rv1 <= rv2 <= rv3
     assert not rv1 >= rv2
     assert not rv1 > rv2
-    assert not rv1 == rv2
+    assert rv1 != rv2
     assert rv1 == rv1

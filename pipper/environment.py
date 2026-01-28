@@ -1,14 +1,13 @@
 import json
 import os
 import pathlib
-import typing
 
 import boto3
+import yaml
 from botocore.client import BaseClient
 from botocore.credentials import Credentials
 
 from pipper import s3
-from typing import Optional
 
 REPOSITORY_CONFIGS_PATH = os.path.join(
     os.path.expanduser("~"), ".pipper", "repositories.json"
@@ -16,7 +15,7 @@ REPOSITORY_CONFIGS_PATH = os.path.join(
 
 
 class Environment:
-    def __init__(self, args: Optional[dict] = None):
+    def __init__(self, args: dict | None = None):
         self.args = clean_args(args or {})
         repository = load_repository(self.args.get("repository_name"))
         default_repository = load_repository(None, True)
@@ -25,7 +24,7 @@ class Environment:
         self.s3_client: BaseClient = self.aws_session.client("s3")
 
     @property
-    def target_directory(self) -> typing.Optional[pathlib.Path]:
+    def target_directory(self) -> pathlib.Path | None:
         """
         Specifies the directory in which the action will take place for non-standard
         installation locations.
@@ -69,7 +68,7 @@ def clean_args(args: dict) -> dict:
 def load_repositories() -> dict:
     """ """
     try:
-        with open(REPOSITORY_CONFIGS_PATH, "r") as f:
+        with open(REPOSITORY_CONFIGS_PATH) as f:
             return json.load(f)
     except Exception:
         return {"repositories": {}, "default": None}
@@ -87,9 +86,7 @@ def save_repositories(config_data: dict) -> dict:
     return config_data
 
 
-def load_repository(
-    repository_name: typing.Union[str, None], allow_default: bool = False
-) -> dict:
+def load_repository(repository_name: str | None, allow_default: bool = False) -> dict:
     """ """
     results = load_repositories()
 
@@ -105,15 +102,20 @@ def load_repository(
         return {}
 
 
-def load_configs(configs_path: Optional[str] = None):
-    """ """
-    path = os.path.realpath(configs_path or os.path.join(os.curdir, "pipper.json"))
+def load_configs(configs_path: str | None = None):
+    """Load configuration file data from the associated pipper file."""
+    path_options = [
+        pathlib.Path(configs_path).resolve() if configs_path else None,
+        pathlib.Path("./pipper.json").resolve(),
+        pathlib.Path("./pipper.yaml").resolve(),
+    ]
+    path = next((p for p in path_options if p and p.exists()), None)
+    if path is None:
+        raise FileNotFoundError(f'Missing configuration file "{path}"')
 
-    if not os.path.exists(path):
-        raise FileNotFoundError('Missing configuration file "{}"'.format(path))
-
-    with open(path, "r") as f:
-        return json.load(f)
+    if path.name.endswith(".json"):
+        return json.loads(path.read_text("utf-8"))
+    return yaml.safe_load(path.read_text("utf-8"))
 
 
 def get_session(
@@ -175,9 +177,9 @@ def get_session(
     token = getattr(credentials, "token", None)
 
     print("\n[LOADED]: AWS Credentials")
-    print("    PROFILE: {}".format(session.profile_name))
-    print("    ACCESS: {}".format(access_key))
-    print("    SECRET: {}...".format(secret))
+    print(f"    PROFILE: {session.profile_name}")
+    print(f"    ACCESS: {access_key}")
+    print(f"    SECRET: {secret}...")
     print(
         "     TOKEN: {}{}".format(
             token[:12] if token else "NONE", "..." if token else ""

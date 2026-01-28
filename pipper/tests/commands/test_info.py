@@ -1,9 +1,10 @@
 from unittest.mock import MagicMock
 from unittest.mock import patch
 
+import lobotomy
+
 from pipper import command
 from pipper.tests import utils
-import lobotomy
 
 
 @lobotomy.Patch()

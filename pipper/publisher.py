@@ -134,7 +134,7 @@ def run(env: Environment):
     target_path = os.path.realpath(env.args["target_path"])
 
     if not os.path.exists(target_path):
-        raise FileNotFoundError('No such path "{}"'.format(target_path))
+        raise FileNotFoundError(f'No such path "{target_path}"')
 
     bundle_path = (
         get_pipper_files_in(target_path)[-1]

@@ -24,7 +24,7 @@ def test_bundle():
         command.run(
             [
                 "bundle",
-                "--output={}".format(str(directory)),
+                f"--output={str(directory)}",
                 str(project_directory),
             ]
         )
@@ -52,7 +52,7 @@ def test_bundle_poetry():
         command.run(
             [
                 "bundle",
-                "--output={}".format(str(directory)),
+                f"--output={str(directory)}",
                 str(project_directory),
             ]
         )
@@ -68,8 +68,8 @@ def test_bundle_poetry():
 
 def test_bundle_without_pipper_dot_json():
     """
-    Should be able to succesffully bundle the hello_pipper project into a
-    pipper file even if no `pipper.json` file is given.
+    Should be able to successfully bundle the hello_pipper project into a
+    pipper file even if no `pipper.(json|yaml)` file is given.
     """
     current_directory = pathlib.Path(os.curdir).absolute()
     directory = tempfile.mkdtemp()
@@ -82,7 +82,7 @@ def test_bundle_without_pipper_dot_json():
         command.run(
             [
                 "bundle",
-                "--output={}".format(str(directory)),
+                f"--output={str(directory)}",
                 str(directory),
             ]
         )

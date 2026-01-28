@@ -1,12 +1,10 @@
-import typing
-
 import boto3
 from botocore.client import BaseClient
 
 
 def session_from_credentials_list(
     credentials: list,
-) -> typing.Union[boto3.Session, None]:
+) -> boto3.Session | None:
     """ """
     is_valid = (
         credentials and len(credentials) > 1 and credentials[0] and credentials[1]
@@ -26,8 +24,8 @@ def session_from_credentials_list(
 
 
 def session_from_profile_name(
-    profile_name: typing.Union[str, None],
-) -> typing.Union[boto3.Session, None]:
+    profile_name: str | None,
+) -> boto3.Session | None:
     """ """
 
     if not profile_name:
